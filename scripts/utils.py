@@ -1,52 +1,53 @@
+import re
 from PyPDF2 import PdfReader
 
 def extract_dialogues(pdf_path, start_page, end_page, spoken_roles, silent_roles):
     reader = PdfReader(pdf_path)
     dialogues = []
+    roles_set = set(spoken_roles + silent_roles)
 
-    # Zbierz wszystkie role jako wielkie litery
-    all_roles = [r.upper() for r in spoken_roles + silent_roles]
+    text = ''
+    for i in range(start_page - 1, end_page):
+        text += reader.pages[i].extract_text() + '\n'
 
-    for page_num in range(start_page - 1, end_page):
-        if page_num >= len(reader.pages):
-            continue
+    lines = text.split('\n')
+    current_character = None
+    current_line = ''
 
-        page = reader.pages[page_num]
-        text = page.extract_text()
-        if not text:
-            continue
+    for line in lines:
+        line = line.strip()
 
-        lines = text.splitlines()
-        i = 0
-        while i < len(lines):
-            line = lines[i].strip()
-            line_upper = line.upper()
+        # Jeśli linia to IMIĘ POSTACI (wielkimi literami, jedno lub dwa słowa)
+        if re.fullmatch(r'[A-ZĄĆĘŁŃÓŚŻŹ]{2,}( [A-ZĄĆĘŁŃÓŚŻŹ]{2,})?', line):
+            # Zapamiętaj poprzednią kwestię
+            if current_character and current_line:
+                if current_character in roles_set:
+                    dialogues.append({
+                        'character': current_character.title(),
+                        'line': current_line.strip()
+                    })
+            current_character = line.title()
+            current_line = ''
+        elif line == '':
+            # Koniec wypowiedzi
+            if current_character and current_line:
+                if current_character in roles_set:
+                    dialogues.append({
+                        'character': current_character.title(),
+                        'line': current_line.strip()
+                    })
+                current_character = None
+                current_line = ''
+        else:
+            current_line += ' ' + line
 
-            if line_upper in all_roles:
-                character = line_upper
-                spoken = character in [r.upper() for r in spoken_roles]
-
-                # Zbieramy kolejne linie jako wypowiedź postaci
-                dialogue_lines = []
-                i += 1
-                while i < len(lines):
-                    next_line = lines[i].strip()
-                    next_upper = next_line.upper()
-
-                    if next_upper in all_roles or next_line == '':
-                        break
-
-                    dialogue_lines.append(next_line)
-                    i += 1
-
-                full_line = ' '.join(dialogue_lines)
-
-                dialogues.append({
-                    'character': character,
-                    'line': full_line,
-                    'spoken': spoken,
-                })
-            else:
-                i += 1
+    # Dodaj ostatnią kwestię, jeśli została
+    if current_character and current_line:
+        if current_character in roles_set:
+            dialogues.append({
+                'character': current_character.title(),
+                'line': current_line.strip()
+            })
 
     return dialogues
+

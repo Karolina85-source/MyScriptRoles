@@ -1,29 +1,90 @@
 {% extends 'scripts/base.html' %}
-
-{% block title %}Podgląd wybranych ról{% endblock %}
+{% block title %}Podgląd ról{% endblock %}
 
 {% block content %}
-<h2>Podgląd: {{ script.title }}</h2>
+<h2>{{ script.title }}</h2>
 
-{% if dialogues %}
-  <ul style="list-style: none; padding: 0;">
-    {% for dialogue in dialogues %}
-      <li style="margin-bottom: 1.5em; padding: 1em; background-color: #f9f9f9; border-radius: 8px;">
-        <strong>{{ dialogue.character }}</strong><br>
-        <p style="margin-top: 0.5em;">{{ dialogue.line }}</p>
-        {% if dialogue.spoken %}
-          <span style="color: green;">🎙 Czyta komputer</span>
-        {% else %}
-          <span style="color: gray;">⏸ Pauza – Twoja kwestia</span>
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>Brak dopasowanych kwestii.</p>
-{% endif %}
+<div id="dialogue-container">
+    <p><strong>Kliknij Start, aby rozpocząć czytanie scenariusza.</strong></p>
+    <button id="start-button">▶️ Start</button>
+</div>
 
-<br>
-<a href="{% url 'choose_roles' script.id %}">← Zmień wybór ról i stron</a> |
-<a href="{% url 'dashboard' %}">← Wróć do dashboardu</a>
+<script>
+const dialogues = {{ dialogues|safe }};
+const spokenRoles = {{ spoken_roles|safe }};
+let index = 0;
+let isStarted = false;
+
+const container = document.getElementById("dialogue-container");
+
+function speakLine(text, onend) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pl-PL";
+    utterance.rate = 1;
+
+    utterance.onend = onend;
+    window.speechSynthesis.speak(utterance);
+}
+
+function showDialogue(dialogue) {
+    const lineDiv = document.createElement("div");
+    lineDiv.style.marginBottom = "1em";
+
+    const character = document.createElement("strong");
+    character.textContent = dialogue.character + ": ";
+    lineDiv.appendChild(character);
+
+    const lineText = document.createElement("span");
+    lineText.textContent = dialogue.line;
+    lineDiv.appendChild(lineText);
+
+    container.appendChild(lineDiv);
+}
+
+function nextLine() {
+    if (index >= dialogues.length) {
+        const endMsg = document.createElement("p");
+        endMsg.innerHTML = "<strong>To już koniec scenariusza.</strong>";
+        container.appendChild(endMsg);
+        return;
+    }
+
+    const current = dialogues[index];
+    showDialogue(current);
+
+    if (spokenRoles.includes(current.character)) {
+        // Jeżeli to rola do czytania – mówimy i idziemy dalej automatycznie
+        speakLine(current.line, () => {
+            index++;
+            nextLine();
+        });
+    } else {
+        // Jeżeli to rola użytkownika – pauza i przycisk "Dalej"
+        const pauseMsg = document.createElement("p");
+        pauseMsg.innerHTML = "<em>To Twoja kwestia. Przeczytaj ją na głos, a następnie kliknij Dalej.</em>";
+
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "➡️ Dalej";
+        nextBtn.onclick = () => {
+            nextBtn.remove();
+            pauseMsg.remove();
+            index++;
+            nextLine();
+        };
+
+        container.appendChild(pauseMsg);
+        container.appendChild(nextBtn);
+    }
+}
+
+document.getElementById("start-button").addEventListener("click", function () {
+    if (!isStarted) {
+        isStarted = true;
+        this.remove();  // usuń przycisk start
+        nextLine();     // zacznij czytanie
+    }
+});
+</script>
 {% endblock %}
+
+
