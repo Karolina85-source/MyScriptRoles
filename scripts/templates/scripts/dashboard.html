@@ -1,0 +1,26 @@
+{% extends 'scripts/base.html' %}
+
+{% block title %}Twoje scenariusze{% endblock %}
+
+{% block content %}
+
+<h3>Twoje scenariusze</h3>
+
+<p><a href="{% url 'add_script' %}">➕ Dodaj nowy</a></p>
+
+{% if scripts %}
+  <ul>
+    {% for script in scripts %}
+      <li>
+        <strong>{{ script.title }}</strong> |
+        <a href="{% url 'view_script' script.id %}">👁️ Podgląd</a> |
+        <a href="{% url 'choose_roles' script.id %}">🎭 Wybierz role</a> |
+        <a href="{% url 'delete_script' script.id %}">🗑️ Usuń</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Nie masz jeszcze żadnych scenariuszy.</p>
+{% endif %}
+
+{% endblock %}

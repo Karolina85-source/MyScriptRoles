@@ -1,0 +1,29 @@
+{% extends 'scripts/base.html' %}
+
+{% block title %}Podgląd wybranych ról{% endblock %}
+
+{% block content %}
+<h2>Podgląd: {{ script.title }}</h2>
+
+{% if dialogues %}
+  <ul style="list-style: none; padding: 0;">
+    {% for dialogue in dialogues %}
+      <li style="margin-bottom: 1.5em; padding: 1em; background-color: #f9f9f9; border-radius: 8px;">
+        <strong>{{ dialogue.character }}</strong><br>
+        <p style="margin-top: 0.5em;">{{ dialogue.line }}</p>
+        {% if dialogue.spoken %}
+          <span style="color: green;">🎙 Czyta komputer</span>
+        {% else %}
+          <span style="color: gray;">⏸ Pauza – Twoja kwestia</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Brak dopasowanych kwestii.</p>
+{% endif %}
+
+<br>
+<a href="{% url 'choose_roles' script.id %}">← Zmień wybór ról i stron</a> |
+<a href="{% url 'dashboard' %}">← Wróć do dashboardu</a>
+{% endblock %}

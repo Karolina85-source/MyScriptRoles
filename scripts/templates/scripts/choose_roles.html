@@ -1,0 +1,52 @@
+{% extends 'scripts/base.html' %}
+
+{% block title %}Wybierz role i strony{% endblock %}
+
+{% block content %}
+<h2>Wybierz fragment scenariusza: <em>{{ script.title }}</em></h2>
+
+<p>Podaj zakres stron i określ, które postaci ma czytać komputer, a które mają być wyświetlane jako pauzy.</p>
+
+<form method="post">
+  {% csrf_token %}
+
+  {% if form.errors %}
+    <ul style="color: red;">
+      {% for field in form %}
+        {% for error in field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <div>
+    <label for="{{ form.start_page.id_for_label }}">Strona początkowa:</label><br>
+    {{ form.start_page }}
+  </div>
+
+  <div>
+    <label for="{{ form.end_page.id_for_label }}">Strona końcowa:</label><br>
+    {{ form.end_page }}
+  </div>
+
+  <div>
+    <label for="{{ form.spoken_roles.id_for_label }}">Postaci do czytania (oddziel przecinkami):</label><br>
+    {{ form.spoken_roles }}
+  </div>
+
+  <div>
+    <label for="{{ form.silent_roles.id_for_label }}">Postaci do pauzy (oddziel przecinkami):</label><br>
+    {{ form.silent_roles }}
+  </div>
+
+  <br>
+  <button type="submit">Dalej →</button>
+</form>
+
+<br>
+<a href="{% url 'dashboard' %}">← Wróć do dashboardu</a>
+{% endblock %}
