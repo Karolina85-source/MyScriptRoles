@@ -89,6 +89,7 @@ def choose_roles(request, script_id):
             context = {
                 'script': script,
                 'dialogues': dialogues,
+                'spoken_roles': spoken_roles,
             }
             return render(request, 'scripts/preview_roles.html', context)
     else:
