@@ -4,87 +4,142 @@
 {% block content %}
 <h2>{{ script.title }}</h2>
 
+<!-- Pasek postępu -->
+<div style="margin:10px 0;">
+    <div id="progress-text" style="font-weight: bold; margin-bottom: 5px;"></div>
+    <div style="background: #ddd; height: 20px; border-radius: 10px; overflow: hidden;">
+        <div id="progress-bar" style="height: 100%; width: 0%; background: #4caf50; transition: width 0.4s;"></div>
+    </div>
+</div>
+
 <div id="dialogue-container">
     <p><strong>Kliknij Start, aby rozpocząć czytanie scenariusza.</strong></p>
-    <button id="start-button">▶️ Start</button>
+    <button id="start-button" class="btn">▶️ Start</button>
 </div>
+
+<style>
+.current-line {
+    background: #fff8dc;     /* subtelny żółty */
+    border-radius: 7px;
+    box-shadow: 0 1px 6px #eee;
+    padding: 8px;
+    transition: background 0.4s;
+}
+</style>
 
 <script>
 const dialogues = {{ dialogues|safe }};
-const spokenRoles = {{ spoken_roles|safe }};
+const spokenRolesRaw = {{ spoken_roles|safe }};
+const spokenRoles = spokenRolesRaw.map(r => r.toLowerCase());
+
 let index = 0;
 let isStarted = false;
+let selectedVoice = null;
+let rate = 1; // prędkość domyślna
 
 const container = document.getElementById("dialogue-container");
+const progressText = document.getElementById("progress-text");
+const progressBar = document.getElementById("progress-bar");
+
+function updateProgress() {
+    progressText.textContent = `Kwestia ${Math.min(index + 1, dialogues.length)} / ${dialogues.length}`;
+    const percent = ((index) / dialogues.length) * 100;
+    progressBar.style.width = `${percent}%`;
+}
+
+function loadDefaultVoice() {
+    const voices = speechSynthesis.getVoices();
+    selectedVoice = voices.find(v => v.lang.startsWith("pl")) || voices[0] || null;
+}
+
+speechSynthesis.onvoiceschanged = loadDefaultVoice;
+
+function scrollToCurrent() {
+    const currentLine = container.querySelector(".current-line");
+    if (currentLine) {
+        currentLine.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+}
 
 function speakLine(text, onend) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "pl-PL";
-    utterance.rate = 1;
-
-    utterance.onend = onend;
-    window.speechSynthesis.speak(utterance);
+    if (!selectedVoice) loadDefaultVoice();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.voice = selectedVoice;
+    utter.lang = selectedVoice ? selectedVoice.lang : "pl-PL";
+    utter.rate = rate;
+    utter.onend = () => setTimeout(onend, 700);
+    speechSynthesis.speak(utter);
 }
 
 function showDialogue(dialogue) {
-    const lineDiv = document.createElement("div");
-    lineDiv.style.marginBottom = "1em";
+    // Usuń podświetlenie z poprzedniej kwestii
+    const prev = container.querySelector(".current-line");
+    if (prev) prev.classList.remove("current-line");
 
-    const character = document.createElement("strong");
-    character.textContent = dialogue.character + ": ";
-    lineDiv.appendChild(character);
+    const div = document.createElement("div");
+    div.classList.add("current-line");
+    div.style.marginBottom = "1em";
 
-    const lineText = document.createElement("span");
-    lineText.textContent = dialogue.line;
-    lineDiv.appendChild(lineText);
+    const char = document.createElement("strong");
+    char.textContent = dialogue.character + ": ";
+    div.appendChild(char);
 
-    container.appendChild(lineDiv);
+    const line = document.createElement("span");
+    line.textContent = dialogue.line;
+    div.appendChild(line);
+
+    container.appendChild(div);
+    updateProgress();
+    scrollToCurrent();
 }
 
 function nextLine() {
     if (index >= dialogues.length) {
+        updateProgress();
+        progressBar.style.width = "100%";
         const endMsg = document.createElement("p");
         endMsg.innerHTML = "<strong>To już koniec scenariusza.</strong>";
         container.appendChild(endMsg);
+        scrollToCurrent();
         return;
     }
 
     const current = dialogues[index];
     showDialogue(current);
 
-    if (spokenRoles.includes(current.character)) {
-        // Jeżeli to rola do czytania – mówimy i idziemy dalej automatycznie
+    if (spokenRoles.includes(current.character.toLowerCase())) {
         speakLine(current.line, () => {
             index++;
             nextLine();
         });
     } else {
-        // Jeżeli to rola użytkownika – pauza i przycisk "Dalej"
-        const pauseMsg = document.createElement("p");
-        pauseMsg.innerHTML = "<em>To Twoja kwestia. Przeczytaj ją na głos, a następnie kliknij Dalej.</em>";
+        const pause = document.createElement("p");
+        pause.innerHTML = "<em>To Twoja kwestia. Przeczytaj ją, a potem kliknij Dalej.</em>";
 
         const nextBtn = document.createElement("button");
         nextBtn.textContent = "➡️ Dalej";
         nextBtn.onclick = () => {
             nextBtn.remove();
-            pauseMsg.remove();
+            pause.remove();
             index++;
             nextLine();
         };
 
-        container.appendChild(pauseMsg);
+        container.appendChild(pause);
         container.appendChild(nextBtn);
+        scrollToCurrent();
     }
 }
 
-document.getElementById("start-button").addEventListener("click", function () {
+document.getElementById("start-button").addEventListener("click", () => {
     if (!isStarted) {
         isStarted = true;
-        this.remove();  // usuń przycisk start
-        nextLine();     // zacznij czytanie
+        loadDefaultVoice();
+        document.getElementById("start-button").remove();
+        nextLine();
     }
 });
+
+loadDefaultVoice();
 </script>
 {% endblock %}
-
-

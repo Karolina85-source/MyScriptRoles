@@ -2,9 +2,8 @@
 {% block title %}Podgląd scenariusza{% endblock %}
 {% block content %}
 <h2>{{ script.title }}</h2>
-
-<p><a href="{{ script.pdf.url }}" target="_blank">📄 Otwórz PDF w nowej karcie</a></p>
-
+<p><a class="btn" href="{{ script.pdf.url }}" target="_blank">📄 Otwórz PDF w nowej karcie</a></p>
+<p><a class="btn" href="{% url 'choose_roles' script.id %}">🎭 Wybierz role</a></p>
 <h3>Treść scenariusza:</h3>
 <pre style="white-space: pre-wrap; background: #f9f9f9; padding: 1em; border-radius: 10px;">
 {{ text }}

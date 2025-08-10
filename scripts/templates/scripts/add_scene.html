@@ -1,0 +1,11 @@
+{% extends 'scripts/base.html' %}
+{% block title %}Dodaj scenę{% endblock %}
+{% block content %}
+<h2>Dodaj nową scenę</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Zapisz</button>
+</form>
+<p><a href="{% url 'dashboard' %}">← Powrót</a></p>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'scripts/base.html' %}
+{% block title %}Lista scen{% endblock %}
+{% block content %}
+<h2>Sceny</h2>
+<p><a class="btn" href="{% url 'add_scene' %}">➕ Dodaj scenę</a></p>
+{% if scenes %}
+  <ul>
+    {% for s in scenes %}
+      <li>
+        <strong>{{ s.title }}</strong> (Scenariusz: {{ s.script.title }}) |
+        Postacie:
+        {% for ch in s.characters.all %}
+          {{ ch.name }}{% if not forloop.last %}, {% endif %}
+        {% empty %} brak
+        {% endfor %} |
+        <a href="{% url 'edit_scene' s.id %}">✏️ Edytuj</a> |
+        <a href="{% url 'delete_scene' s.id %}" onclick="return confirm('Usunąć scenę?')">🗑️ Usuń</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Brak scen.</p>
+{% endif %}
+{% endblock %}

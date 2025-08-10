@@ -1,0 +1,20 @@
+{% extends 'scripts/base.html' %}
+{% block title %}Lista kwestii{% endblock %}
+{% block content %}
+<h2>Kwestie</h2>
+<p><a class="btn" href="{% url 'add_scene_content' %}">➕ Dodaj kwestię</a></p>
+{% if contents %}
+  <ul>
+    {% for sc in contents %}
+      <li>
+        <strong>{{ sc.character.name }}</strong> (Scena: {{ sc.scene.title }}) |
+        {{ sc.text|truncatechars:60 }} |
+        <a href="{% url 'edit_scene_content' sc.id %}">✏️ Edytuj</a> |
+        <a href="{% url 'delete_scene_content' sc.id %}" onclick="return confirm('Usunąć kwestię?')">🗑️ Usuń</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Brak kwestii.</p>
+{% endif %}
+{% endblock %}

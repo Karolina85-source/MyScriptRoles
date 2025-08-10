@@ -1,0 +1,16 @@
+[0;1;32m●[0m speech-dispatcher.service - Common interface to speech synthesizers
+     Loaded: loaded (]8;;file://ubuntu/usr/lib/systemd/user/speech-dispatcher.service/usr/lib/systemd/user/speech-dispatcher.service]8;;; static[0;1;32m[0m)
+     Active: [0;1;32mactive (running)[0m since Sun 2025-08-10 02:58:10 CEST; 1h 9min ago
+TriggeredBy: [0;1;32m●[0m speech-dispatcher.socket
+   Main PID: 7948 (speech-dispatch)
+      Tasks: 13 (limit: 5962)
+     Memory: 23.7M (peak: 25.6M swap: 744.0K swap peak: 744.0K)
+        CPU: 5.267s
+     CGroup: /user.slice/user-1000.slice/user@1000.service/app.slice/speech-dispatcher.service
+             ├─[0;38;5;245m7948 /usr/bin/speech-dispatcher -s -t 0[0m
+             ├─[0;38;5;245m7963 /usr/lib/speech-dispatcher-modules/sd_espeak-ng /etc/speech-dispatcher/modules/espeak-ng.conf[0m
+             ├─[0;38;5;245m7966 /usr/lib/speech-dispatcher-modules/sd_dummy /etc/speech-dispatcher/modules/dummy.conf[0m
+             └─[0;38;5;245m7969 /usr/lib/speech-dispatcher-modules/sd_openjtalk /etc/speech-dispatcher/modules/openjtalk.conf[0m
+
+sie 10 02:58:10 ubuntu systemd[2125]: Started speech-dispatcher.service - Common interface to speech synthesizers.
+sie 10 02:58:10 ubuntu speech-dispatcher[7948]: [Sun Aug 10 02:58:10 2025 : 179300] speechd: Speech Dispatcher 0.12.0-rc2 starting

@@ -7,12 +7,15 @@
         body { font-family: Arial, sans-serif; margin: 40px; background-color: #f9f9f9; }
         .nav { margin-bottom: 20px; }
         .nav a { margin-right: 15px; text-decoration: none; }
+        .btn { padding: 6px 10px; background: #007BFF; color: white; border-radius: 4px; text-decoration: none; }
+        .btn-danger { background: darkred; }
     </style>
 </head>
 <body>
     <div class="nav">
         {% if user.is_authenticated %}
             Witaj, {{ user.username }}! |
+            <a href="{% url 'dashboard' %}">Dashboard</a> |
             <a href="{% url 'logout' %}">Wyloguj</a>
         {% else %}
             <a href="{% url 'login' %}">Zaloguj</a>

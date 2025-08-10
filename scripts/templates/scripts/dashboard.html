@@ -5,22 +5,32 @@
 {% block content %}
 
 <h3>Twoje scenariusze</h3>
-
-<p><a href="{% url 'add_script' %}">➕ Dodaj nowy</a></p>
-
+<p><a class="btn" href="{% url 'add_script' %}">➕ Dodaj nowy scenariusz</a></p>
 {% if scripts %}
   <ul>
     {% for script in scripts %}
       <li>
-        <strong>{{ script.title }}</strong> |
-        <a href="{% url 'view_script' script.id %}">👁️ Podgląd</a> |
-        <a href="{% url 'choose_roles' script.id %}">🎭 Wybierz role</a> |
-        <a href="{% url 'delete_script' script.id %}">🗑️ Usuń</a>
+        <strong>{{ script.title }}</strong>
+        | <a href="{% url 'view_script' script.id %}">👁️ Podgląd</a>
+        | <a href="{% url 'choose_roles' script.id %}">🎭 Wybierz role</a>
+        | <a href="{% url 'edit_script' script.id %}">✏️ Edytuj</a>
+        | <a href="{% url 'delete_script' script.id %}" class="btn btn-danger"
+             onclick="return confirm('Na pewno chcesz usunąć ten scenariusz?')">🗑️ Usuń</a>
       </li>
     {% endfor %}
   </ul>
 {% else %}
   <p>Nie masz jeszcze żadnych scenariuszy.</p>
 {% endif %}
+
+<hr>
+
+<h3>Zarządzaj elementami scenariuszy</h3>
+<ul>
+  <li><a class="btn" href="{% url 'list_characters' %}">📜 Postacie</a></li>
+  <li><a class="btn" href="{% url 'list_scenes' %}">🎬 Sceny</a></li>
+  <li><a class="btn" href="{% url 'list_scenecontents' %}">💬 Kwestie</a></li>
+  <li><a class="btn" href="{% url 'list_overlays' %}">🎨 Nakładki</a></li>
+</ul>
 
 {% endblock %}
